@@ -1,0 +1,23 @@
+import java.io.*;
+import java.net.*;
+import FileFunctions.*;
+public class MyServer1
+{
+	public static void main(String args[])throws Exception
+ 	{
+		ServerSocket ss=new ServerSocket(6666);
+  		String data="";
+  		while(!data.equals("stop"))
+  		{
+			Socket socket=ss.accept();
+   			BufferedReader br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+   			data=br.readLine();
+   			System.out.println(data);
+   			socket.close();
+   			FileFunctions ff=new FileFunctions();
+   			ff.write("espData.txt", data);
+  		}
+ 	}
+}
+
+

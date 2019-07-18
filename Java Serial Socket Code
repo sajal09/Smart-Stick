@@ -17,7 +17,9 @@ public class MyServer1
    			FileFunctions ff=new FileFunctions();
    			ff.write("espData.txt", data);
   		}
- 	}
+		
+		ff.write("espData.txt", data);
+	}
 }
 
 

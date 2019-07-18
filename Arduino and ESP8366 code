@@ -1,0 +1,87 @@
+#include<SoftwareSerial.h>
+SoftwareSerial esp(2,3);
+#define trigPin 13
+#define echoPin 12
+void setup()
+{
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+    esp.begin(115200);
+    Serial.begin(115200);
+    command("AT+RST\r\n\r\n",2000);
+    command("AT+CWMODE=3\r\n\r\n",2000);
+    command("AT+CWJAP=\"DESKTOP-8AUEUHK 3596\",\"12345678\"\r\n\r\n",4000);
+    command("AT+CIPMUX=0\r\n\r\n",2000);
+}
+
+
+void loop()
+{
+  long duration, distance;
+  digitalWrite(trigPin, LOW); 
+  delayMicroseconds(2); 
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); 
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration/2) / 29.1;
+
+  
+  String d="";
+  command("AT+CIPSTART=\"TCP\",\"172.27.30.124\",6666\r\n\r\n",2000);
+  disp();
+ 
+  Serial.println(distance);
+  if(distance<80)
+  {
+    command("AT+CIPSEND=8\r\n\r\n",1000);
+    command("Obstacle\r\n\r\n",1000);
+    command("AT+CIPCLOSE\r\n\r\n",1000);
+ }
+ else
+ { 
+    command("AT+CIPSEND=5\r\n\r\n",1000);
+    command("Clear\r\n\r\n",1000);
+    command("AT+CIPCLOSE\r\n\r\n",1000);
+ }
+}
+
+
+
+
+void command(String data,int times)
+{
+  esp.println(data);
+  disp();
+  delay(times);
+}
+
+
+
+void disp()
+{ 
+  String data="";
+  int ch=esp.read();
+  while(esp.available()>0&&ch!=-1)
+ {
+  data=data+(char) ch;
+  ch=esp.read();
+ }
+  Serial.println(data);
+}
+
+
+
+void dispserial()
+{
+  String data="";
+  int ch=Serial.read();
+  while(Serial.available()>0&&ch!=-1)
+ {
+    data+=(char)ch;
+    ch=Serial.read();
+ }
+ if(data.length()>0)
+   Serial.println(data);
+}

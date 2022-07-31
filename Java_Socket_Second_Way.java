@@ -1,46 +1,44 @@
 import java.util.Scanner;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
-import j.extensions.comm.*;
- 
-public class Main {
- 
-        public static void main(String[] args) {
-                // create a window with a slider
-                JFrame window = new JFrame();
-                JSlider slider = new JSlider();
-                slider.setMaximum(1023);
-                window.add(slider);
-                window.pack();
-                window.setVisible(true);
-               
-                // determine which serial port to use
-                SerialComm ports[] = SerialComm.getCommPorts();
-                System.out.println("Select a port:");
-                int i = 1;
-                for(SerialComm port : ports) {
-                        System.out.println(i++ + ". " + port.getSystemPortName());
-                }
-                Scanner s = new Scanner(System.in);
-                int chosenPort = s.nextInt();
+import com.fazecast.jSerialComm.*;
 
-                // open and configure the port
-                SerialComm port = ports[chosenPort - 1];
-                if(port.openPort()) {
-                        System.out.println("Successfully opened the port.");
-                } else {
-                        System.out.println("Unable to open the port.");
-                        return;
-                }
-                port.setComPortTimeouts(SerialComm.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-               
-                // enter into an infinite loop that reads from the port and updates the GUI
-                Scanner data = new Scanner(port.getInputStream());
-                while(data.hasNextLine()) {
-                        int number = 0;
-                        try{number = Integer.parseInt(data.nextLine());}catch(Exception e){}
-                        slider.setValue(number);
-                }
-        }
+public class Main {
+
+	public static void main(String[] args) {
+
+		JFrame window = new JFrame();
+		JSlider slider = new JSlider();
+		slider.setMaximum(1023);
+		window.add(slider);
+		window.pack();
+		window.setVisible(true);
+
+		SerialPort[] ports = SerialPort.getCommPorts();
+		System.out.println("Select a port:");
+		int i = 1;
+		for(SerialPort port : ports)
+			System.out.println(i++ +  ": " + port.getSystemPortName());
+		Scanner s = new Scanner(System.in);
+		int chosenPort = s.nextInt();
+
+		SerialPort serialPort = ports[chosenPort - 1];
+		if(serialPort.openPort())
+			System.out.println("Port opened successfully.");
+		else {
+			System.out.println("Unable to open the port.");
+			return;
+		}
+		//serialPort.setComPortParameters(9600, 8, 1, SerialPort.NO_PARITY);
+		serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
+
+		Scanner data = new Scanner(serialPort.getInputStream());
+		int value = 0;
+		while(data.hasNextLine()){
+			try{value = Integer.parseInt(data.nextLine());}catch(Exception e){}
+			slider.setValue(value);
+		}
+		System.out.println("Done.");
+	}
 
 }
